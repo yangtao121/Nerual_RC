@@ -68,16 +68,16 @@ def RCSimulation(params, t, u, method = "exact"):
         for k in range(N):
             i[k] = nla.solve(R, np.array([u[k] - x[k,0], u[k] - x[k,1]])).reshape((-1))
     #### Plot states and input
-    plt.figure(figsize = [8, 7])
-    plt.plot(t, x[:,0], label = "v1")
-    plt.plot(t, x[:, 1], label = "v2")
-  #  plt.plot(t, i[:, 0], label = "i1")
-  #  plt.plot(t, i[:, 1], label = "i2")
-  #  plt.plot(t, np.sum(i, axis = 1), label = "i")
-    plt.plot(t, u, label = "u")
-    plt.title("RC Circuit Simulation\n method = %s, r0 = %.2f, r1 = %.2f, r2 = %.2f, c1 = %.2f, c2 = %.2f"%(method, r0, r1, r2, c1, c2))
-    plt.legend(loc = 0)
-    plt.ion()
+  #   plt.figure(figsize = [8, 7])
+  #   plt.plot(t, x[:,0], label = "v1")
+  #   plt.plot(t, x[:, 1], label = "v2")
+  # #  plt.plot(t, i[:, 0], label = "i1")
+  # #  plt.plot(t, i[:, 1], label = "i2")
+  # #  plt.plot(t, np.sum(i, axis = 1), label = "i")
+  #   plt.plot(t, u, label = "u")
+  #   plt.title("RC Circuit Simulation\n method = %s, r0 = %.2f, r1 = %.2f, r2 = %.2f, c1 = %.2f, c2 = %.2f"%(method, r0, r1, r2, c1, c2))
+  #   plt.legend(loc = 0)
+  #   plt.show()
     return i
 
 
@@ -141,16 +141,16 @@ def nonlinear_system(params, t, u, method = "exact"):
         for k in range(N):
             i[k] = nla.solve(R, np.array([u[k] - nonlinear1[k], u[k] - x[k,1]])).reshape((-1))
     #### Plot states and input
-    plt.figure(figsize = [8, 7])
-    plt.plot(t, nonlinear1, label = "v1")
-    #plt.plot(t, x[:, 1], label = "v2")
-    plt.plot(t, i[:, 0], label = "i1")
-  #  plt.plot(t, i[:, 1], label = "i2")
-  #  plt.plot(t, np.sum(i, axis = 1), label = "i")
-    plt.plot(t, u, label = "u")
-    plt.title("nonlinear rc Simulation\n method = %s, r0 = %.2f, r1 = %.2f, r2 = %.2f, c1 = %.2f, c2 = %.2f"%(method, r0, r1, r2, c1, c2))
-    plt.legend(loc = 0)
-    plt.ion()
+  #   plt.figure(figsize = [8, 7])
+  #   plt.plot(t, nonlinear1, label = "v1")
+  #   #plt.plot(t, x[:, 1], label = "v2")
+  #   plt.plot(t, i[:, 0], label = "i1")
+  # #  plt.plot(t, i[:, 1], label = "i2")
+  # #  plt.plot(t, np.sum(i, axis = 1), label = "i")
+  #   plt.plot(t, u, label = "u")
+  #   plt.title("nonlinear rc Simulation\n method = %s, r0 = %.2f, r1 = %.2f, r2 = %.2f, c1 = %.2f, c2 = %.2f"%(method, r0, r1, r2, c1, c2))
+  #   plt.legend(loc = 0)
+  #   plt.ion()
     return i
 
 
@@ -166,12 +166,13 @@ nu = 1
 T = 40
 dt=.1 # horizon
 N = int(T // dt)
-print("haode{}".format(N))
+print(N)
 t = np.linspace(0., T - dt, N)
 # print(t.shape)
 # u = np.ones((N, nu)) * np.sin(t).reshape((N, nu))
-u = np.ones((N, nu)) * 10 * ss.square(t).reshape((N,nu))
+u = np.random.normal(size=(N, nu))  * ss.square(t).reshape((N,nu))
 a = RCSimulation(params, t, u, method = "exact")
+print(a)
 inp=u
 outp=np.sum(a,axis=1)
 systemidentify(inp,outp)

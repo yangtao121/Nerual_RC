@@ -20,6 +20,7 @@ class Network:
         self.T_step = T_step  # 处理时间间隔
         self.counter = 0
         self.last_state = 0
+        self.last_state_one = 0
         self.input_batch = np.zeros((self.T_step, self.input_dims))
         self.real_output_batch = np.zeros((self.T_step, self.output_dims))
         self.actor_optimizer = tf.keras.optimizers.Adam(actor_lr)
@@ -32,15 +33,27 @@ class Network:
         # 初始化权值
         last_init = tf.random_uniform_initializer(minval=-0.1, maxval=0.1)
 
-        inputs = layers.Input(shape=(self.input_dims,))
-        out = layers.Dense(16, activation='relu')
+        # U的输入
+        u_inputs = layers.Input(shape=(self.input_dims,))
+        u_out = layers.Dense(8, activation='relu')(u_inputs)
+        u_out = layers.BatchNormalization()(u_out)
+
+        # 上一个状态的输入
+        last_input = layers.Input(shape=(self.output_dims,))
+        last_out = layers.Dense(8, activation='relu')
+        last_out = layers.BatchNormalization()(last_out)
+
+        concat = layers.concatenate()([u_out, last_out])
+
+        out = layers.Dense(16, activation='relu')(concat)
         out = layers.BatchNormalization()(out)
         out = layers.Dense(16, activation='relu')(out)
         out = layers.BatchNormalization()(out)
-        outputs = layers.Dense(self.output_dims, activation="tanh", kernel_initializer=last_init)
+
+        outputs = layers.Dense(self.output_dims, activation="tanh", kernel_initializer=last_init)(out)
 
         outputs = outputs * self.K
-        model = tf.keras.Model(inputs, outputs)
+        model = tf.keras.Model([u_inputs, last_input], outputs)
         return model
 
     def get_batch(self, input_batch, real_output_batch):
@@ -69,7 +82,8 @@ class Network:
         获取上一个状态值
         @param last_state: i-1时刻的真实值
         """
-        self.last_state = np.ones((self.T_step,self.input_dims))*last_state
+        self.last_state_one = last_state
+        self.last_state = np.ones((self.T_step, self.input_dims)) * last_state
 
     def learn(self):
         """
@@ -78,7 +92,7 @@ class Network:
         """
         tf_input_batch = tf.convert_to_tensor(self.input_batch, dtype=tf.float32)
         tf_real_output_batch = tf.convert_to_tensor(self.real_output_batch, dtype=tf.float32)
-        tf_last_state = tf.convert_to_tensor(self.last_state,dtype=tf.float32)
+        tf_last_state = tf.convert_to_tensor(self.last_state, dtype=tf.float32)
         with tf.GradientTape() as tape:
             predict = self.actor(tf_input_batch)
             # 线性叠加法
@@ -90,4 +104,6 @@ class Network:
         )
 
     def output_show(self, state):
-        pass
+        out = tf.squeeze(self.actor([state, self.last_state]))
+        out = out.numpy()
+        return out
