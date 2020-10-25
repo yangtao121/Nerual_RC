@@ -106,7 +106,7 @@ class Network:
         self.actor_optimizer.apply_gradients(
             zip(grad, self.actor.trainable_variables)
         )
-        state = tf.squeeze(predict)
+        state = tf.squeeze(predict+tf_last_state)
         state = state.numpy()
         state = np.squeeze(state)
         return state

@@ -18,14 +18,15 @@ T = 40
 dt = 0.1
 N = int(T // dt)
 t = np.linspace(0., T - dt, N)
-CPU = Center(nu, nx, 100, 10, 0.01)
+CPU = Center(nu, nx, 10, 10, 0.01)
 
-total_episodes = 100
+total_episodes = 10000
 
 for ep in range(total_episodes):
     last_state = np.array([0, 0])
     CPU.get_last_state(last_state)
     U = np.random.normal(size=(N, nu)) * ss.square(t).reshape((N, nu))
+    # U = np.ones((N, nu)) * np.sin(t).reshape((N, nu))
     real = RC.RCSimulation(params, t, U, method="exact")
     episode_state = []
     for i in range(N):
@@ -38,31 +39,25 @@ for ep in range(total_episodes):
             episode_state.append(predict)
             # print()
 
-    # 伪测试
-
-    # last_state = np.array([0, 0])
-    # CPU.get_last_state(last_state)
-    # for i in range(N):
-    #     tf_U = tf.expand_dims(tf.convert_to_tensor(U[i], dtype=tf.float32), 0)
-    #     present = CPU.output_show(tf_U)
-    #     episode_state.append(present)
-    #     if (N + 1) % 20 == 0:
-    #         CPU.get_last_state(real[i])
-
     # 画出训练效果图
     episode_state = np.vstack(episode_state)
     # print(real)
     # print("-------------")
     # print(episode_state)
     plt.subplot(221)
-    plt.plot(real[:, 0], 'r')
-    plt.plot(episode_state[:, 0], 'b')
+    plt.plot(real[:, 0], 'b')
+    plt.plot(episode_state[:, 0], 'r', linestyle='-.')
     plt.subplot(222)
-    plt.plot(real[:, 1], 'r')
-    plt.plot(episode_state[:, ], 'b')
+    plt.plot(real[:, 1], 'b')
+    plt.plot(episode_state[:, 1], 'r', linestyle='-.')
 
     fig_name = "./fig/" + str(ep) + ".jpg"
     plt.savefig(fig_name)
     plt.close()
+
+# test by square
+# u = np.random.normal(size=(N, nu)) * ss.square(t).reshape((N, nu))
+# a = RC.RCSimulation(params, t, u, method="exact")
+
 
 CPU.save_model()
