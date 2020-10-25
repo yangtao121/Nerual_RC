@@ -3,13 +3,15 @@ import numpy as np
 import scipy.signal as ss
 from Nerve_Core import Network as Center
 import matplotlib.pyplot as plt
+import tensorflow as tf
 
 # RC网络参数的设定
 r0 = 1
 r1 = 1
+r2 = 1
 c1 = 1
 c2 = 10
-params = [r0, r1, c1, c2]
+params = [r0, r1, r2, c1, c2]
 nx = 2
 nu = 1
 T = 40
@@ -31,19 +33,27 @@ for ep in range(total_episodes):
         if flag:
             CPU.get_last_state(last_state)
             last_state = real[i]
-            CPU.learn()
+            predict = CPU.learn()
+            predict = np.vstack(predict)
+            episode_state.append(predict)
+            # print()
 
     # 伪测试
-    last_state = np.array([0, 0])
-    CPU.get_last_state(last_state)
-    for i in range(N):
-        present = CPU.output_show(U[i])
-        episode_state.append(present)
-        if (N + 1) % 20 == 0:
-            CPU.get_last_state(real[i])
+
+    # last_state = np.array([0, 0])
+    # CPU.get_last_state(last_state)
+    # for i in range(N):
+    #     tf_U = tf.expand_dims(tf.convert_to_tensor(U[i], dtype=tf.float32), 0)
+    #     present = CPU.output_show(tf_U)
+    #     episode_state.append(present)
+    #     if (N + 1) % 20 == 0:
+    #         CPU.get_last_state(real[i])
 
     # 画出训练效果图
-    episode_state = np.array(episode_state)
+    episode_state = np.vstack(episode_state)
+    # print(real)
+    # print("-------------")
+    # print(episode_state)
     plt.subplot(221)
     plt.plot(real[:, 0], 'r')
     plt.plot(episode_state[:, 0], 'b')
@@ -54,6 +64,5 @@ for ep in range(total_episodes):
     fig_name = "./fig/" + str(ep) + ".jpg"
     plt.savefig(fig_name)
     plt.close()
-
 
 CPU.save_model()

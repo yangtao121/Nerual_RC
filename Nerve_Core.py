@@ -35,19 +35,23 @@ class Network:
 
         # U的输入
         u_inputs = layers.Input(shape=(self.input_dims,))
-        u_out = layers.Dense(8, activation='relu')(u_inputs)
+        u_out = layers.Dense(16, activation='relu')(u_inputs)
+        u_out = layers.BatchNormalization()(u_out)
+        u_out = layers.Dense(32, activation='relu')(u_out)
         u_out = layers.BatchNormalization()(u_out)
 
         # 上一个状态的输入
         last_input = layers.Input(shape=(self.output_dims,))
-        last_out = layers.Dense(8, activation='relu')
+        last_out = layers.Dense(16, activation='relu')(last_input)
+        last_out = layers.BatchNormalization()(last_out)
+        last_out = layers.Dense(32, activation='relu')(last_input)
         last_out = layers.BatchNormalization()(last_out)
 
-        concat = layers.concatenate()([u_out, last_out])
+        concat = layers.Concatenate()([u_out, last_out])
 
-        out = layers.Dense(16, activation='relu')(concat)
+        out = layers.Dense(512, activation='relu')(concat)
         out = layers.BatchNormalization()(out)
-        out = layers.Dense(16, activation='relu')(out)
+        out = layers.Dense(512, activation='relu')(out)
         out = layers.BatchNormalization()(out)
 
         outputs = layers.Dense(self.output_dims, activation="tanh", kernel_initializer=last_init)(out)
@@ -94,7 +98,7 @@ class Network:
         tf_real_output_batch = tf.convert_to_tensor(self.real_output_batch, dtype=tf.float32)
         tf_last_state = tf.convert_to_tensor(self.last_state, dtype=tf.float32)
         with tf.GradientTape() as tape:
-            predict = self.actor(tf_input_batch)
+            predict = self.actor([tf_input_batch, tf_last_state])
             # 线性叠加法
             y = tf_real_output_batch + tf_last_state - predict
             loss = tf.math.reduce_mean(tf.math.square(y))
@@ -102,9 +106,14 @@ class Network:
         self.actor_optimizer.apply_gradients(
             zip(grad, self.actor.trainable_variables)
         )
+        state = tf.squeeze(predict)
+        state = state.numpy()
+        state = np.squeeze(state)
+        return state
 
-    def output_show(self, input):
-        out = tf.squeeze(self.actor([input, self.last_state_one]))
+    def output_show(self, u_input):
+        tf_last_state = tf.convert_to_tensor(self.last_state_one, dtype=tf.float32)
+        out = tf.squeeze(self.actor([u_input, tf_last_state]))
         out = out.numpy()
         return out
 
