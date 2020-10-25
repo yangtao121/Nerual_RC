@@ -155,31 +155,31 @@ def nonlinear_system(params, t, u, method = "exact"):
 
 
 
-r0=1
-r1 = 1
-r2 = 1
-c1=1
-c2 = 10
-params = [r0, r1, r2, c1, c2]
-nx = 2
-nu = 1
-T = 40
-dt=.1 # horizon
-N = int(T // dt)
-print(N)
-t = np.linspace(0., T - dt, N)
-# print(t.shape)
-# u = np.ones((N, nu)) * np.sin(t).reshape((N, nu))
-u = np.random.normal(size=(N, nu))  * ss.square(t).reshape((N,nu))
-a = RCSimulation(params, t, u, method = "exact")
-print(a)
-inp=u
-outp=np.sum(a,axis=1)
-systemidentify(inp,outp)
-# b=nonlinear_system(params,t,u,method='exact')
+# r0=1
+# r1 = 1
+# r2 = 1
+# c1=1
+# c2 = 10
+# params = [r0, r1, r2, c1, c2]
+# nx = 2
+# nu = 1
+# T = 40
+# dt=.1 # horizon
+# N = int(T // dt)
+# print(N)
+# t = np.linspace(0., T - dt, N)
+# # print(t.shape)
+# # u = np.ones((N, nu)) * np.sin(t).reshape((N, nu))
+# u = np.random.normal(size=(N, nu))  * ss.square(t).reshape((N,nu))
+# a = RCSimulation(params, t, u, method = "exact")
+# # print(a)
 # inp=u
-# outp=np.sum(b,axis=1)
+# outp=np.sum(a,axis=1)
 # systemidentify(inp,outp)
+# # b=nonlinear_system(params,t,u,method='exact')
+# # inp=u
+# # outp=np.sum(b,axis=1)
+# # systemidentify(inp,outp)
 
 
 

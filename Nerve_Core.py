@@ -103,7 +103,10 @@ class Network:
             zip(grad, self.actor.trainable_variables)
         )
 
-    def output_show(self, state):
-        out = tf.squeeze(self.actor([state, self.last_state]))
+    def output_show(self, input):
+        out = tf.squeeze(self.actor([input, self.last_state_one]))
         out = out.numpy()
         return out
+
+    def save_model(self):
+        self.actor.save_weights("actor.h5")
